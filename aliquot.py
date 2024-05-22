@@ -150,6 +150,7 @@ class Aliquot(object):
                 # additional warnings (non-fatal)
             if pmax > old_pmax:
                 warning(f"sieved up to {pmax} from {old_pmax}")
+            old_pmax = pmax
 
                 # add the new value to the domain
             domain.add(n)
