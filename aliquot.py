@@ -146,6 +146,7 @@ class Aliquot(object):
             if pmax > largest_prime:
                 warning(f"Largest prime {pmax} > {largest_prime}")
                 cls.status = cls.SIEVE_OVERFLOW
+                return seq
 
                 # additional warnings (non-fatal)
             if pmax > old_pmax:
@@ -198,7 +199,7 @@ def plot(seq, title="aliquot sequence plot", logarithmic=False):
     plt.ylabel("term log(a(k),10)" if logarithmic else "a(k)")
     if logarithmic:
         plt.yscale("log")
-        formatter = ticker.StrMethodFormatter('{x:.1f}')
+        formatter = ticker.StrMethodFormatter('{x:.0f}')
         plt.gca().yaxis.set_minor_formatter(formatter)
 
     plt.plot(xs, ys)
@@ -239,7 +240,7 @@ def main(argv):
 
     print(seq)
     status = Aliquot.status
-    if status == Aliquot.PREMATURE_TERMINATION:
+    if status == Aliquot.LENGTH_EXCEEDED:
         print("The sequence does not repeat or terminate after",
               args.length, "terms.")
     elif status == Aliquot.PERIODIC:
