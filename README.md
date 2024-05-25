@@ -1,5 +1,6 @@
-# number_theory
-relatively small programs for studying elementary number theory
+# number_theory - elementary number theory
+
+This repository is a collection of relatively small programs for studying elementary number theory.
 
 ## Description
 
@@ -20,39 +21,45 @@ The programs are licensed under an open MIT-style license.  The full license may
 ## Examples
 
 * *plot_aliquot(1264460)-sociable-period4.png* - a plot of the aliquot sequence for 1264460, a sociable number with a period of 4.  To reproduce this example, you need to soften one of the checks:
-  ```
-  python3 aliquot.py 1264460 --largest_value 2000000
-  ```
-  The two million argument allows terms in the sequence to be as large as two million.  By default, the program will terminate with an exception if the largest value or the largest prime in the sieve exceeds 100,000.  The --largest_value and --largest_prime optional arguments allow these limits to be increased.  The following display shows the console output:
-  ```
-  ~/Projects/Number Theory> python aliquot.py 1264460 --largest-value 2000000
-  WARNING (aliquot): sieved up to 3947 from 19
-  WARNING (aliquot): sieved up to 43783 from 3947
-  [1547860, 1727636, 1305184, 1264460, 1547860]
-  The sequence is periodic.
-  Period 4: repeats with sociable number 1547860
-  ```
+
+```
+        python3 aliquot.py 1264460 --largest_value 2000000
+```
+
+>  The two million argument allows terms in the sequence to be as large as two million.  By default, the program will terminate with an exception if the largest value or the largest prime in the sieve exceeds 100,000.  The --largest_value and --largest_prime optional arguments allow these limits to be increased.  The following display shows the console output:
+
+```
+        ~/Projects/Number Theory> python aliquot.py 1264460 --largest-value 2000000
+        WARNING (aliquot): sieved up to 3947 from 19
+        WARNING (aliquot): sieved up to 43783 from 3947
+        [1547860, 1727636, 1305184, 1264460, 1547860]
+        The sequence is periodic.
+        Period 4: repeats with sociable number 1547860 
+```
  
 * *plot_aliquot(276)-unknown.png* - a plot for the aliquot sequence for 276.  It is not known whether this sequence is bounded. According to ProofWiki, the 469th term is 45 digits long.  Our plot only found the first 26 digits.  This is the smallest unsolved example.  Here is the console output:
-  ```
-  ~/Projects/Number Theory> python aliquot.py 276 -l 25 --log -L 1000000
-  WARNING (aliquot): sieved up to 31 from 19
-  WARNING (aliquot): sieved up to 577 from 31
-  WARNING (aliquot): sieved up to 929 from 577
-  WARNING (aliquot): sieved up to 2441 from 929
-  WARNING (aliquot): sieved up to 16703 from 2441
-  WARNING (aliquot): Maximum length 25 exceeded.
-  [396, 696, 1104, 1872, 3770, 3790, 3050, 2716, 2772, 5964, 10164, 19628, 19684, 22876, 26404, 30044, 33796, 38780, 54628, 54684, 111300, 263676, 465668, 465724, 465780]
-  The sequence does not repeat or terminate after 25 terms.
-  ```
-  The -l parameter told the program to stop after 25 terms.  (It finds 26.)  The -L parameter says that terms should not exceed ome million.  The --log flag says that the plot should be logarithmic. The console output tells us that the last three evaluated terms were between 400,000 and 500,000.
+
+```
+        ~/Projects/Number Theory> python aliquot.py 276 -l 25 --log -L 1000000
+        WARNING (aliquot): sieved up to 31 from 19
+        WARNING (aliquot): sieved up to 577 from 31
+        WARNING (aliquot): sieved up to 929 from 577
+        WARNING (aliquot): sieved up to 2441 from 929
+        WARNING (aliquot): sieved up to 16703 from 2441
+        WARNING (aliquot): Maximum length 25 exceeded.
+        [396, 696, 1104, 1872, 3770, 3790, 3050, 2716, 2772, 5964, 10164, 19628, 19684, 22876, 26404, 30044, 33796, 38780, 54628, 54684, 111300, 263676, 465668, 465724, 465780]
+        The sequence does not repeat or terminate after 25 terms.
+```
+
+>  The -l parameter told the program to stop after 25 terms.  (It finds 26.)  The -L parameter says that terms should not exceed ome million.  The --log flag says that the plot should be logarithmic. The console output tells us that the last three evaluated terms were between 400,000 and 500,000.
 
 * *plot_aliquot(360)-terminating.png* and *plot_aliquot(360)-terminating-log.png* - a plot and a logarithmic plot of the aliquot sequence for 360, and abundant number as the sum s(360)=396 of its proper divisors exceeds 360.  Its aliquot sequence terminates after 29 terms.  It reaches a peak of 6490 (s(6464)=6490) before collapsing.  The console output tells the story:
-  ```
-  ~/Projects/Number Theory$ python aliquot.py 360
-  WARNING (aliquot): sieved up to 211 from 19
-  WARNING (aliquot): sieved up to 1499 from 211
-  WARNING (aliquot): sieved up to 2441 from 1499
-  [810, 1368, 2532, 3404, 2980, 3320, 4240, 5804, 4360, 5540, 6136, 6464, 6490, 6470, 5194, 4040, 5140, 5696, 5734, 3194, 1600, 2337, 1023, 513, 287, 49, 8, 7, 1, 0]
-  The sequence is terminating.
-  ```
+
+```
+        ~/Projects/Number Theory$ python aliquot.py 360
+        WARNING (aliquot): sieved up to 211 from 19
+        WARNING (aliquot): sieved up to 1499 from 211
+        WARNING (aliquot): sieved up to 2441 from 1499
+        [810, 1368, 2532, 3404, 2980, 3320, 4240, 5804, 4360, 5540, 6136, 6464, 6490, 6470, 5194, 4040, 5140, 5696, 5734, 3194, 1600, 2337, 1023, 513, 287, 49, 8, 7, 1, 0]
+        The sequence is terminating.
+```
