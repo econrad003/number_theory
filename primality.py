@@ -157,7 +157,7 @@ class Primes(object):
         test whether n is prime
 
         The only difference between this test and the test for irrecucibility
-        is when 0 is tested.  0 is prime (under ourdefinition) but not
+        is when 0 is tested.  0 is prime (under our definition) but not
         irreducible.
 
         Note that Python treats the boolean False as 0.
