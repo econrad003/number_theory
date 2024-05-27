@@ -1,5 +1,5 @@
 """
-primes.py - simple prime factorization
+primality.py - simple prime factorization
 Eric Conrad
 
 LICENSE
