@@ -121,6 +121,9 @@ class GaussianFrac(Complex):
     Q(i) = Q+Qi = {a+bi: a in Q, b in Q}.
     """
 
+    ROUNDING_METHOD = None
+    methods = {}
+
     def __init__(self, a:int=0, b:int=0, c:int=1):
         """constructor
 
@@ -442,6 +445,96 @@ class GaussianFrac(Complex):
             return other ** Fraction(self._a, self._b)
         return other ** complex(self)
 
+    @staticmethod
+    def rounding(u, ndigits:int=0):
+        """round to nearest Gaussian integer"""
+            # round the parts
+        a = round(Fraction(u._a, u._c), ndigits=ndigits)
+        b = round(Fraction(u._b, u._c), ndigits=ndigits)
+
+            # add 'em up!
+        u = GaussianFrac(a.numerator, 0, a.denominator)
+        v = GaussianFrac(0, b.numerator, b.denominator)
+        return u + v
+
+    @staticmethod
+    def truncating(u, ndigits:int=0):
+        """truncate towards zero"""
+        if not isinstance(ndigits, int):
+            raise TypeError("ndigits must be an integer")
+
+            # unpack
+        if isinstance(u, (int, Fraction)):
+            a, b = u, 0
+        else:
+            a, b = Fraction(u._a, u._c), Fraction(u._b, u._c)
+
+            # determine the divisor
+        if ndigits == 0:
+            c = 1
+        elif ndigits > 0:
+            c = Fraction(1, 10 ** ndigits)
+        else:
+            c = Fraction(10 ** - ndigits, 1)
+
+            # the real part
+        a = - (-a // c) if a<0 else a // c
+        a *= c
+
+            # the imaginary part
+        b = - (-b // c) if b<0 else b // c
+        b *= c
+
+            # combine
+        u = GaussianFrac(a.numerator, 0, a.denominator)
+        v = GaussianFrac(0, b.numerator, b.denominator)
+        return u + v
+
+    @staticmethod
+    def rounding_method(method="round"):
+        """sets the default rounding method"""
+        if isinstance(method, str):
+            methods = GaussianFrac.methods["ROUND"]
+            method = methods[method]
+        if not callable(method):
+            print("NOTE: form is method(u, ndigits=0)")
+            raise TypeError("The method must be callable")
+        GaussianFrac.ROUNDING_METHOD = method
+
+    def __round__(self, ndigits=0):
+        """round or truncate"""
+        return GaussianFrac.ROUNDING_METHOD(self, ndigits)
+
+    def __divmod__(self, other):
+        """division with quotient and remainder"""
+        q = round(self / other)
+        r = self - q * other
+        return (q, r)
+
+    def __rdivmod__(self, other):
+        """reversed division with quotient and remainder"""
+        if isinstance(other, GaussianFrac):
+            return divmod(other, self)
+        if isinstance(other, (int, Fraction)):
+            a = GaussianFrac(other.numerator, 0, other.denominator)
+            return divmod(a, self)
+        if isinstance(other, (float, complex)):
+            a = other.real
+            b = other.imag
+            if a == int(a) and b == int(b):
+                c = GaussianFrac(int(a), int(b))
+                return divmod(c, self)
+        raise NotImplementedError
+
+    # populate the methods table
+GaussianFrac.methods["ROUND"] = {} 
+GaussianFrac.methods["ROUND"]["r"] = GaussianFrac.rounding
+GaussianFrac.methods["ROUND"]["round"] = GaussianFrac.rounding
+GaussianFrac.methods["ROUND"]["t"] = GaussianFrac.truncating
+GaussianFrac.methods["ROUND"]["trunc"] = GaussianFrac.truncating
+GaussianFrac.methods["ROUND"]["truncate"] = GaussianFrac.truncating
+GaussianFrac.rounding_method()      # set rounding method to round
+
 class GaussianInt(GaussianFrac):
     """Gaussian integers"""
 
@@ -561,6 +654,116 @@ class GaussianInt(GaussianFrac):
             # BOTH congruent to three modulo 4 AND an ordinary prime
         return norm % 4 == 3 and self._primes.is_prime(norm)
 
+def normsq(u):
+    """a safer way to compute the norm squared"""
+    return u.real ** 2 + u.imag ** 2
+
+def GaussianGCD(*args, maxiters=100, warnings=True,
+                debug=False, quotients=False,
+                rounding="round"):
+    """Gaussian Integer GCD
+
+    The arguments may be int or GaussianInt.  The result will be in
+    the first quadrant.
+    """
+    def validate(x):
+        """validate an argument"""
+        if isinstance(x, (GaussianFrac, Fraction)):
+            if x.denominator != 1:
+                print(f"ERROR: The denominator of {a} must be 1.")
+                raise ValueError("GCD: Invalid Gaussian rational.")
+            return
+        if not isinstance(a, int):
+            raise TypeError(f"GCD: {type(y)} not supported")
+
+    def validate_all(args):
+        """full validation"""
+        args2 = []                  # the nonzero arguments
+        for arg in args:
+            validate(arg)
+            if arg != 0:
+                args2.append(arg)
+        if len(args) < 1:
+            raise ValueError("There must be a nonzero argument")
+        return args2
+
+    def pure_result(result):
+        """move a pure result to the positive real axis"""
+        if result.real == 0:
+            return abs(result.imag)
+        if result.imag == 0:
+            return abs(result.real)
+
+                # THIS IS SUPPOSED TO BE UNREACHABLE CODE
+        raise RuntimeError("Something is rotten in Helsinki!")
+
+    def impure_result(result):
+        """move an impure result to its first quadrant associate"""
+        if result.real > 0:
+            if result.imag > 0:         # Quadrant I
+                return result
+            elif result.imag < 0:       # Quadrant IV
+                    # (a - bi)i = b + ai
+                return result * GaussianInt(0,1)
+        elif result.real < 0:
+            if result.imag > 0:         # Quadrant II
+                    # (-a + bi) (-i) = b + ai
+                return result * GaussianInt(0,-1)
+            elif result.imag < 0:       # Quadrant III
+                return - result
+
+                # THIS IS SUPPOSED TO BE UNREACHABLE CODE
+        raise RuntimeError("Something is rotten in Copenhagen!")
+
+        # VALIDATION
+
+    args = validate_all(args)
+
+    if quotients:
+        if len(args) == 2:
+            GaussianGCD.quotients = []
+        else:
+            raise Warning("Can only save quotients with 2 arguments!")
+
+        # Nearest neighbor setup
+    save_rounding = GaussianFrac.ROUNDING_METHOD
+    GaussianFrac.rounding_method(rounding)
+
+        # THE EUCLIDEAN ALGORITHM
+
+    args.reverse()                  # the first shall be last...
+    y = args.pop()                  # now the last shall be first!
+    while args:
+        x = args.pop()              # retrieve the next argument
+        q, r = divmod(x, y)         # DIVISION ALGORITHM
+        if quotients:
+            GaussianGCD.quotients.append(q)
+
+        iters = 1
+        while r != 0 and iters < maxiters:
+            iters += 1
+            x, y = y, r                 # shift...
+            q, r = divmod(x, y)         # DIVISION ALGORITHM
+            if quotients:
+                GaussianGCD.quotients.append(q)
+
+        if r != 0:
+            raise Warning(f"Maximum iterations ({maxiters}) exceeded")
+
+        # Restore the rounding method
+    GaussianFrac.rounding_method(save_rounding)
+
+        # NORMALIZATION
+
+    if y.denominator != 1:
+            # THIS SHOULD NOT HAPPEN!
+        raise RuntimeError("Something is rotten in Alexandria!")
+
+    if y.real != 0 and y.imag != 0:
+        return impure_result(y)
+
+    return pure_result(y)
+
 if __name__ == "__main__":
         # TEST CASES
 
@@ -675,6 +878,109 @@ if __name__ == "__main__":
     u = GaussianInt(0,1)**GaussianInt(0,1)
     v = 1j**1j
     assert abs(u-v) < 1e-5
+
+    print("\ttest __round__ and friends")
+        # default round
+        #   round parts to nearest integer, if tie, use even
+    assert round(GaussianFrac(1, 1, 2)) == 0    # nearest, tie with even
+    assert round(GaussianFrac(3, 5, 2)) == GaussianInt(2, 2)
+    assert round(GaussianFrac(3, 5, 7)) == GaussianInt(0, 1)
+    assert round(GaussianFrac(-1, -1, 2)) == 0
+    assert round(GaussianFrac(-3, -5, 2)) == GaussianInt(-2, -2)
+    assert round(GaussianFrac(-3, -5, 7)) == GaussianInt(0, -1)
+        # round to hundredths
+        # 1/7 = .142857...,  2/7 = .285714...
+    u = GaussianFrac(1, 2, 7)
+    v = GaussianFrac(14, 29, 100)
+    # print("Rounding", u, "to hundredths:")
+    # print("Got:", round(u, ndigits=2), "Expected:", v)
+    assert round(u, ndigits=2) == v
+        # round to hundreds
+        # 10000/7 = 1428.571428...,  20000/7 = 2857.14285714...
+    u = GaussianFrac(10000, 20000, 7)
+    u1 = complex(u)
+    u2 = f"{u1.real:.5f}i+{u1.imag:.5f}"
+    v = GaussianFrac(1400, 2900)
+    # print("Rounding", f"{u}, ({u2})", "to hundreds:")
+    # print("Got:", round(u, ndigits=-2), "Expected:", v)
+    assert round(u, ndigits=-2) == v
+        # DIVISION ALGORITHM!
+    x = GaussianInt(100, 200)
+    y = 7
+    q, r = divmod(x, y)
+    assert x == y*q + r
+    assert r.normsq() < GaussianInt(7).normsq()
+        # DIVISION ALGORITHM!
+    x = GaussianInt(100, 200)
+    y = GaussianInt(3, 5)
+    q, r = divmod(x, y)
+    assert x == y*q + r
+    assert r.normsq() < y.normsq()
+
+    print("\ttest truncating")
+    GaussianFrac.rounding_method("trunc")
+        # truncating
+        #   truncate parts rounding towards zero
+    assert round(GaussianFrac(1, 1, 2)) == 0
+    assert round(GaussianFrac(3, 5, 2)) == GaussianInt(1, 2)
+    assert round(GaussianFrac(3, 5, 7)) == 0
+    assert round(GaussianFrac(-1, -1, 2)) == 0
+    assert round(GaussianFrac(-3, -5, 2)) == GaussianInt(-1, -2)
+    assert round(GaussianFrac(-3, -5, 7)) == 0
+        # round to hundredths
+        # 1/7 = .142857...,  2/7 = .285714...
+    u = GaussianFrac(1, 2, 7)
+    v = GaussianFrac(14, 28, 100)
+    # print("Truncating", u, "to hundredths:")
+    # print("Got:", round(u, ndigits=2), "Expected:", v)
+    assert round(u, ndigits=2) == v
+        # truncate to hundreds
+        # 10000/7 = 1428.571428...,  20000/7 = 2857.14285714...
+    u = GaussianFrac(10000, 20000, 7)
+    u1 = complex(u)
+    u2 = f"{u1.real:.5f}i+{u1.imag:.5f}"
+    v = GaussianFrac(1400, 2800)
+    # print("Truncating", f"{u}, ({u2})", "to hundreds:")
+    # print("Got:", round(u, ndigits=-2), "Expected:", v)
+    assert round(u, ndigits=-2) == v
+        # DIVISION ALGORITHM!
+    x = GaussianInt(100, 200)
+    y = 7
+    q, r = divmod(x, y)
+    assert x == y*q + r
+    assert r.normsq() < GaussianInt(7).normsq()
+        # DIVISION ALGORITHM!
+    x = GaussianInt(100, 200)
+    y = GaussianInt(3, 5)
+    q, r = divmod(x, y)
+    assert x == y*q + r
+    assert r.normsq() < y.normsq()
+
+    print("\ttest GaussianGCD")
+        # some Gaussian primes
+    p2a = GaussianInt(1,1)
+    p2b = GaussianInt(1,-1)
+    assert p2a * p2b == 2
+    p3 = 3
+    p5a = GaussianInt(2,1)
+    p5b = GaussianInt(2,-1)
+    assert p5a * p5b == 5
+    p17a = GaussianInt(4,1)
+    p17b = GaussianInt(4,-1)
+    assert p17a * p17b == 17
+        # now some composite numbers
+    u = (p2a ** 5) * (p3 ** 4) * (p5a ** 3) * p17a
+    print("\t\tu =", u)
+    v = (p2a ** 3) * (p3 ** 5) * (p5b ** 3) * p17b
+    print("\t\tv =", v)
+    w = (p2a ** 3) * (p3 ** 4)
+    print("\t\tw =", w)
+    x = GaussianGCD(w)
+    print("\t\tGCD(w) =", x)
+    assert x.real >= 0 and x.imag >= 0
+    y = GaussianGCD(u,v)
+    print("\t\tGCD(u,v) =", y)
+    assert y == x
 
     print("\ttest primality interface")
     assert GaussianInt(1,1).is_prime
