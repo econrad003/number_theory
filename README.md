@@ -6,6 +6,10 @@ This repository is a collection of relatively small programs for studying elemen
 
 This is a place for me to save programs that I write as experiments in elementary number theory.  (Don't expect anything particularly deep, but if you happen to find something useful, then great!)  Most of what goes here will probably be written in Python 3.
 
+## Recent Updates
+
+27 May 2024 - The Division Algorithm and the Euclidean Algorithm for Gaussian integers have been incorporated in *gaussian_int.py*.  A demo which lists Gaussian primes (*list_gaussian_primes.py*) and some sample output have also been added to this repository.
+
 ## License
 
 The programs are licensed under an open MIT-style license.  The full license may be found in the *LICENSE* file in this repository and in program and module documentation.  If you do find something to be useful or fun or surprising, you are not required to share your efforts and modifications, but I encourage you to do so.
@@ -16,9 +20,19 @@ The programs are licensed under an open MIT-style license.  The full license may
 
 * *aliquot.py* - a program for studying aliquot sequences - usage information is in the program docstring and can be accessed using in help using the command "`python3 aliquot.py -h`".  For a typical example, try something like `python3 aliquot.py 360` for a plot of the aliquot sequence for 360.  There are some checks analogous to recursion limits to help avoid accidentally using all your computer memory, as well as ways to soften or circumvent these checks.
 
-* *gaussian_int.py* - a module which implements Gaussian integers (class GaussianInt -- complex numbers whose real and imaginary parts are both integers) and Gaussian rational numbers (class GaussianFrac -- quotients of Gaussian integers).  Basic operations (addition, subtraction, multiplication, division, and exponentiation) are implemented.  In addition, the GaussianInt class incorporates rudimentary primality testing using some of the features implemented in module *primality.py*.  Running the module as a main program executes a number of program checks.  Since this module uses *math.isqrt()", it requires Python 3.8 or later.  The Gaussian rational numbers interface seems to be reasonably complete, but the Gaussian integer division algorithm (division with remainder) and GCD algorithm still need to be done.
+* *gaussian_int.py* - a module which implements Gaussian integers (class GaussianInt -- complex numbers whose real and imaginary parts are both integers) and Gaussian rational numbers (class GaussianFrac -- quotients of Gaussian integers).  Basic operations (addition, subtraction, multiplication, division, and exponentiation) are implemented.  In addition, the GaussianInt class incorporates rudimentary primality testing using some of the features implemented in module *primality.py*.  Running the module as a main program executes a number of program checks.  Since this module uses *math.isqrt()", it requires Python 3.8 or later.  The Gaussian integer division algorithm (division with remainder) and the Euclidead GCD algorithm have been programmed and seem to be working.
+
+* *list_gaussian_primes.py* - a demo program to list Gaussian primes.  Run it with the *-h* option for more details.  Sample output (console output for Gaussian primes less than 100 in complex norm and CSV output for Gaussian primes less than 500 in complex norm, both sorted in increasing norm order) is in this repository.  (Note: I count zero as a prime, so it appears first in both lists.  The Gaussian units \[1, -1, i, -i\] are not counted as prime.)
+
+```
+        python3 list_gaussian_pries.py -h
+```
 
 ## Examples
+
+* *Gaussian_primes_to_100.txt* - Gaussian primes (including 0, but not units) with complex norm less than 100 in display format, with headings.
+
+* *Gaussian_primes_to_500.csv* - Gaussian primes (including 0, but not units) with complex norm less than 500 in comma-separated variable (*i.e.* simple spreadsheet) format, with headings.
 
 * *plot_aliquot(1264460)-sociable-period4.png* - a plot of the aliquot sequence for 1264460, a sociable number with a period of 4.  To reproduce this example, you need to soften one of the checks:
 
