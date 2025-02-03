@@ -8,6 +8,8 @@ This is a place for me to save programs that I write as experiments in elementar
 
 ## Recent Updates
 
+2 Feb 2025 (one module added) - Module *harmonic.py* approximates positive real numbers by series based on greedily chosen subsequences of the harmonic sequence.  For numbers between 0 and 1, the result is as for Sylvester's Egyptian fraction algorithm.  For large positive numbers, the sequences become unmanageable.  This is apt to be of more theoretical than practical significance.  As with *cfrac.py* and *sylvester.py* this contains a *self\_test()* method and a few useful support methods.
+
 31 Jan 2025 (two modules added) - Module *cfrac.py* finds regular continued fraction representations for real numbers.  Module *sylvester.py* finds Egyptian fraction representations for real numbers.  See the program and function documentation for details.  Both modules contain a method *self\_test()* which is executed as a main routine -- the *self\_test()* method provides some usage examples.
 
 27 May 2024 - The Division Algorithm and the Euclidean Algorithm for Gaussian integers have been incorporated in *gaussian_int.py*.  A demo which lists Gaussian primes (*list_gaussian_primes.py*) and some sample output have also been added to this repository.
